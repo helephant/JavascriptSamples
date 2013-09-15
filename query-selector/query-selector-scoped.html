@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>querySelector scoped inside an element</title>
+	<style type="text/css">
+	.box {
+		width: 150px;
+		height: 150px;
+		background: magenta;
+
+		padding: 7px;
+		margin: 7px;
+		float: left;
+	}
+  .line {
+    overflow: auto;
+    margin-bottom: 14px;
+  }
+	</style>
+	<script type="text/javascript">
+	window.onload = function() {
+    document.getElementById("button").addEventListener("click", function() {
+        var boxes = document.getElementById("first-line").querySelectorAll(".box");
+        for(var x=0; x<boxes.length; x++)
+        {
+          boxes[x].style.background = "pink";
+        }
+    });
+	}
+	</script>
+</head>
+<body>
+<h1>querySelector scoped inside an element</h1>
+<p>The querySelector and querySelectorAll methods are available on all DOM elements. If you
+  call the method from a DOM element rather than from the document, only child elements will
+  be searched.</p>
+
+
+<div id="first-line" class="line">
+  <p>These boxes will change because they're inside the first-line div:</p>
+	<div class="box">First</div>
+	<div class="box">Second</div>
+	<div class="box">Third</div>
+  
+</div>
+
+<div class="line">
+  <p>These boxes won't change:</p>
+  <div class="box">First</div>
+  <div class="box">Second</div>
+  <div class="box">Third</div>
+</div>
+
+<input id="button" type="button" value="switch color" />
+
+
+
+</body>
+</html>

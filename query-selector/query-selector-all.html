@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>document.querySelectorAll</title>
+	<style type="text/css">
+	.box {
+		width: 150px;
+		height: 150px;
+		background: magenta;
+
+		padding: 7px;
+		margin: 7px;
+		float: left;
+	}
+	</style>
+	<script type="text/javascript">
+	window.onload = function() {
+		var boxes = document.querySelectorAll("div.box");
+		for(var x=0; x<boxes.length; x++)
+		{
+			boxes[x].addEventListener("mouseover", function(e) {
+				//e.target.style.background = "cornflower";
+				this.style.background = "pink";
+			});
+		}
+	}
+	</script>
+</head>
+<body>
+<h1>document.querySelectorAll</h1>
+
+<div class="box">First</div>
+<div class="box">Second</div>
+<div class="box">Third</div>
+
+</body>
+</html>

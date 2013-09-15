@@ -1,0 +1,153 @@
+Anonymous functions are functions that are dynamically declared at runtime. They're called anonymous functions because they aren't given a name in the same way as normal functions.
+
+Anonymous functions are declared using the <a href="https://developer.mozilla.org/en/JavaScript/Reference/Operators/Special/function">function operator</a>. You can use the function operator to create a new function wherever it's valid to put an expression. For example you could declare a new function as a parameter to a function call or to assign a property of another object.
+
+The function operator returns a reference to the function that was just created. The function can then be assigned to a variable, passed as a parameter or returned from another function. This is possible because <a href="/2008/08/functions-are-first-class-objects-in-javascript/">functions are first class objects</a> in javascript.
+
+Here's an example where a function is declared in the regular way using the <a href="https://developer.mozilla.org/en/JavaScript/Reference/Statements/function">function statement</a>:
+<pre language="javascript">
+function eatCake(){
+    alert("So delicious and moist");
+};
+eatCake();
+</pre>
+
+Here's an example where the same function is declared dynamically using the function operator:
+<pre language="javascript">
+var eatCakeAnon = function(){
+    alert("So delicious and moist");
+};
+eatCakeAnon();
+</pre>
+<a href="/wp-content/uploads/2008/11/anonymousfunction.html">Complete example</a>.
+
+<h2>Why is this useful?</h2>
+<h3>Declaring single use functions</h3>
+Anonymous functions can help make code more concise when declaring a function that will only be used in one place. Rather than having to declare the function and then use it, you can do both in one step. It's particularly useful for wiring up event handlers and creating methods in <a href="/2008/09/constructor-functions/">constructor functions</a>.
+
+For example, a constructor function will need to create methods for the object it is creating. It's possible to declare the function using the function statement and then assign it to a variable as a separate step like this:
+<pre language="javascript">
+function Pet(name, species, hello){
+    this.name = name;
+    this.species = species;
+    this.hello = hello;
+    function sayHello()
+    {
+        alert(this.hello);
+    }
+    this.sayHello = sayHello;
+}
+</pre>
+
+But it's more concise to use the function operator do it in one step:
+<pre language="javascript">
+function Pet2(name, species, hello){
+    this.name = name;
+    this.species = species;
+    this.hello = hello;
+    this.sayHello = function()
+    {
+        alert(this.hello);
+    }
+}
+</pre>
+<a href="/wp-content/uploads/2008/11/anonymousfunction2.html">Complete example</a>.
+
+Anonymous functions are also really handy when you need to pass a little bit of code to a another function.  If the function you need is very short, it's often convenient to declare it when you call the function you want to pass it to:
+<pre language="javascript">
+window.addEventListener("load",
+     function() { alert("All done");},
+false);
+</pre>
+
+<h3>Provides scope for variables</h3>
+Variables are scoped at the function level in javascript. This is different to what you might be used to in a language like C# or Java where the variables are scoped to the block. What this means is if you declare a variable inside a loop or an if statement, it will be available to the entire function.
+
+If you ever find yourself needing to explicitly scope a variable inside a function you can use an anonymous function to do this. You can actually create an anonymous function and then execute it straight away and all the variables inside will be scoped to the anonymous function:
+<pre language="javascript">
+(function() {
+    var myProperty = "hello world";
+    alert(myProperty);
+})();
+alert(typeof(myProperty)); // undefined
+</pre>
+<a href="/wp-content/uploads/2008/11/anonymous4.html">Complete example</a>.
+
+Some people use this if they want to do some processing the global scope but don't want to add new members.
+
+<h3>Dynamic programming</h3>
+One of the big differences between javascript and more traditional languages like C# is that javascript is dynamic. Anonymous functions is one of the big ways to take advantage of that in your code.
+
+Imagine that you're an programmer who has created a new type of textbox that filters the user's input based on data type. So you can say that the user is only allowed to enter numbers into the textbox and any other characters will be filtered. You're using the <a href="http://ajax.asp.net">ASP.NET ajax framework</a> (because the place you work is a Microsoft shop and you have to) and the convention for ASP.NET ajax server controls is to use a get/set method to access any properties on your object.
+
+Your textbox has three different properties (maxLength, cssClass and dataType) which means six boring little methods you have to write that will just clutter up your textbox's javascript declaration and won't really add anything to the logic.
+
+Here's a bit of a subversive idea.. why don't we get the computer to do the work? Why don't we make the textbox automatically generate the get/set methods from the properties when it initializes itself? That way we can have six less methods in our javascript object and if we add another property it will automatically get the methods.
+
+This example creates an init function that takes a list of server properties and values and then creates a getter and setter on the object for each one. This is possible because we can create as many new anonymous functions as we like at runtime:
+<pre language="javascript">
+$helephant.components = {
+    init : function(object, serverProperties)
+    {
+        for(var property in serverProperties)
+        {
+            // set the textbox's property
+            $helephant.components.createGetter(textbox, property);
+            $helephant.components.createSetter(textbox, property, serverProperties[property]);
+        }
+    },
+
+    createGetter : function(object, property)
+    {
+        var propertyName = "get_" + property;
+        if(typeof(object.constructor.prototype[propertyName]) == "undefined")
+        {
+            object.constructor.prototype[propertyName] = function()
+            {
+                return this[property];
+            };
+        }
+    },
+
+    createSetter : function(object, property, initialValue)
+    {
+        var propertyName = "set_" + property;
+        if(typeof(object.constructor.prototype[propertyName]) == "undefined")
+        {
+            object.constructor.prototype[propertyName] = function(value)
+            {
+                this[property] = value;
+            };
+        }
+        if(typeof(initialValue) != "undefined")
+            object[propertyName](initialValue);
+    }
+}
+</pre>
+
+The code that calls the methods never needs to know they were dynamically generated. It calls them in exactly the same way as a usual method:
+<pre language="javascript">
+var maxLength = textbox.get_maxLength();
+textbox.set_cssClass("redAlert");
+</pre>
+<a href="/wp-content/uploads/2008/11/anonymous5.html">Complete example</a>.
+
+Another example of this is in the <a href="http://jquery.com/">JQuery</a> library where they set up the <a href="http://docs.jquery.com/Events">convenient helper methods for binding to events</a> from a list of events that are supported:
+<pre language="javascript">
+jQuery.each( ("blur,focus,load,resize,scroll,unload,click,dblclick," +
+    "mousedown,mouseup,mousemove,mouseover,mouseout,change,select," +
+    "submit,keydown,keypress,keyup,error").split(","), function(i, name){
+
+    // Handle event binding
+    jQuery.fn[name] = function(fn){
+        return fn ? this.bind(name, fn) : this.trigger(name);
+    };
+});
+</pre>
+
+This may look a little unfamiliar to people who are used to statically typed languages like C#. What you have to remember is that you don't get the static typed safety in javascript whatever you do because javascript doesn't work like that. The only thing you can do is try to get the most out of the language features that javascript does have.
+
+<h2>What's next?</h2>
+Sometimes you want to create a lot of objects with the same properties and methods. <a href="/2008/09/constructor-functions/">Constructor functions</a> are you very own object factories that can stamp out as many objects with the same type as you need.
+
+This article is part of a set of related posts about <a href="/2008/08/how-javascript-objects-work/">How javascript objects work</a>.

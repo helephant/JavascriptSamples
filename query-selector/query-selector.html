@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>document.querySelector</title>
+	<style type="text/css">
+	input[type=button] {
+		background: lime;
+	}
+	</style>
+	<script type="text/javascript">
+	window.onload = function() {
+		var button = document.querySelector("input[type=button]");
+		button.addEventListener("click", function() {
+			alert("button was clicked");
+		})
+	}
+	</script>
+</head>
+<body>
+<h1>document.querySelector</h1>
+
+<form>
+<input type="button" value="Comment" />
+</form>
+
+</body>
+</html>
